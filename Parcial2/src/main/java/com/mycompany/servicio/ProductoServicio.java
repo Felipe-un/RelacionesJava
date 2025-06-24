@@ -1,3 +1,4 @@
+// Archivo: com/miempresa/servicio/ProductoServicio.java (modificado)
 package com.mycompany.servicio;
 
 import com.google.firebase.database.DatabaseReference;
@@ -6,35 +7,36 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.mycompany.conexion.FirebaseConexion;
 import com.mycompany.modelo.Producto;
+import com.mycompany.interfaces.CrudOperaciones; // ¡Importamos nuestra interfaz!
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch; // Para operaciones asíncronas
+import java.util.concurrent.CountDownLatch;
 
-public class ProductoServicio {
+// Ahora ProductoServicio implementa CrudOperaciones para Productos
+public class ProductoServicio implements CrudOperaciones<Producto> {
 
     private DatabaseReference productosRef;
-    private Gson gson; // Para manejar JSON
+    private Gson gson;
 
     public ProductoServicio() {
         FirebaseDatabase database = FirebaseConexion.getDatabase();
-        productosRef = database.getReference("productos"); // 'productos' será el nodo raíz en Firebase
+        productosRef = database.getReference("productos");
         gson = new Gson();
     }
 
-    // --- C (Create): Crear un nuevo producto ---
-    public void crearProducto(Producto producto) {
-        // Generar un ID único si el producto no lo tiene
+    // --- Implementación de los métodos de la interfaz ---
+
+    @Override // Buena práctica para indicar que se sobrescribe un método de una interfaz/clase padre
+    public void crear(Producto producto) {
+        // Tu código existente de crearProducto
         if (producto.getId() == null || producto.getId().isEmpty()) {
             producto.setId(productosRef.push().getKey());
         }
-        // Convertir el objeto Producto a JSON (Map)
         Map<String, Object> productoMap = new HashMap<>();
         productoMap.put("nombre", producto.getNombre());
         productoMap.put("precio", producto.getPrecio());
@@ -49,28 +51,25 @@ public class ProductoServicio {
         });
     }
 
-    // --- R (Read): Leer todos los productos ---
-    public List<Producto> obtenerTodosLosProductos() {
+    @Override
+    public List<Producto> leerTodos() {
+        // Tu código existente de obtenerTodosLosProductos
         final List<Producto> productos = new ArrayList<>();
-        final CountDownLatch latch = new CountDownLatch(1); // Para esperar la respuesta asíncrona
+        final CountDownLatch latch = new CountDownLatch(1);
 
         productosRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    // Firebase devuelve un Map<String, Object> donde el String es el ID
-                    // y Object es el objeto JSON del producto.
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        // Convertir el DataSnapshot a un objeto Producto
                         Producto producto = snapshot.getValue(Producto.class);
-                        // Asignar el ID del snapshot al objeto Producto
                         if (producto != null) {
                             producto.setId(snapshot.getKey());
                             productos.add(producto);
                         }
                     }
                 }
-                latch.countDown(); // Indicar que la operación ha terminado
+                latch.countDown();
             }
 
             @Override
@@ -81,7 +80,7 @@ public class ProductoServicio {
         });
 
         try {
-            latch.await(); // Esperar hasta que la operación asíncrona complete
+            latch.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             System.err.println("Operación interrumpida: " + e.getMessage());
@@ -89,14 +88,13 @@ public class ProductoServicio {
         return productos;
     }
 
-    // --- U (Update): Actualizar un producto existente ---
-    public void actualizarProducto(Producto producto) {
+    @Override
+    public void actualizar(Producto producto) {
+        // Tu código existente de actualizarProducto
         if (producto.getId() == null || producto.getId().isEmpty()) {
             System.err.println("No se puede actualizar un producto sin ID.");
             return;
         }
-
-        // Convertir el objeto Producto a JSON (Map)
         Map<String, Object> productoUpdates = new HashMap<>();
         productoUpdates.put("nombre", producto.getNombre());
         productoUpdates.put("precio", producto.getPrecio());
@@ -111,8 +109,9 @@ public class ProductoServicio {
         });
     }
 
-    // --- D (Delete): Eliminar un producto ---
-    public void eliminarProducto(String idProducto) {
+    @Override
+    public void eliminar(String idProducto) {
+        // Tu código existente de eliminarProducto
         productosRef.child(idProducto).removeValue((databaseError, databaseReference) -> {
             if (databaseError != null) {
                 System.err.println("Error al eliminar producto: " + databaseError.getMessage());
