@@ -114,3 +114,13 @@ Departamentos de Universidad Nacional antes de eliminar: 3
 Departamentos de Universidad Nacional despu�s de 'eliminar' (lista vac�a): 0
 ------------------------------------------------------------------------
 BUILD SUCCESS
+
+# - PANTALLAZOS
+* CASOS 1 Y 2:
+![image](https://github.com/user-attachments/assets/48135c75-5e8f-4113-993d-6168b2886eea)
+* CASOS 3 Y 4:
+![image](https://github.com/user-attachments/assets/2e081cc8-6a60-478e-a9f7-2c90e3946032)
+![image](https://github.com/user-attachments/assets/7f51a16e-2d59-453a-a4da-6a7caa524827)
+
+
+
